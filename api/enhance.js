@@ -26,34 +26,26 @@ export default async function handler(req, res) {
   }
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY, // set in Vercel dashboard
-        'anthropic-version': '2023-06-01',
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'llama-3.3-70b-versatile',
         max_tokens: 1000,
-        system: SYSTEM_PROMPT,
         messages: [
-          { role: 'user', content: `Enhance this prompt:\n\n${prompt.trim()}` },
-        ],
-      }),
-    });
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: `Enhance this prompt:\n\n${prompt}` }
+        ]
+      })
+    })
+    
+    const data = await response.json()
+    const result = data.choices?.[0]?.message?.content || ''
+    return res.status(200).json({ result })
 
-    if (!response.ok) {
-      const err = await response.json();
-      return res
-        .status(response.status)
-        .json({ error: err?.error?.message || 'Anthropic API error' });
-    }
-
-    const data = await response.json();
-    const result = data.content?.find((b) => b.type === 'text')?.text || '';
-
-    return res.status(200).json({ result });
   } catch (e) {
     return res
       .status(500)
