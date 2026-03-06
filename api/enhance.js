@@ -42,7 +42,8 @@ export default async function handler(req, res) {
       })
     })
     
-    const data = await response.json()
+    const data = await response.json();
+    console.log('Groq response:', JSON.stringify(data)) 
     const result = data.choices?.[0]?.message?.content || ''
     return res.status(200).json({ result })
 
