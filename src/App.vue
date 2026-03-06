@@ -1,85 +1,44 @@
 <template>
-  <div>
-    <div class="bg-grid"></div>
-    <div class="orb orb1"></div>
-    <div class="orb orb2"></div>
-    <div class="orb orb3"></div>
+  <div class="root">
+    <!-- Decorative blobs -->
+    <div class="blob blob1"></div>
+    <div class="blob blob2"></div>
+    <div class="blob blob3"></div>
+    <div class="dots-grid"></div>
 
     <div class="app">
       <!-- Header -->
       <div class="header">
         <div class="badge">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path
-              d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-            />
-          </svg>
-          Senior Prompt Engineer
+          <span class="badge-icon">⚡</span> Senior Prompt Engineer
         </div>
-        <h1 class="title">Prompt Enhancer</h1>
-        <p class="subtitle">
-          Transform simple prompts into expert-level Claude instructions using
-          battle-tested prompt engineering techniques.
-        </p>
-        <div class="stats">
-          <div class="stat">
-            <div class="stat-dot"></div>
-            Role Definition
-          </div>
-          <div class="stat">
-            <div
-              class="stat-dot"
-              style="background: #c084fc; box-shadow: 0 0 8px #c084fc"
-            ></div>
-            XML Structure
-          </div>
-          <div class="stat">
-            <div
-              class="stat-dot"
-              style="background: #22d3ee; box-shadow: 0 0 8px #22d3ee"
-            ></div>
-            Chain-of-Thought
-          </div>
-          <div class="stat">
-            <div
-              class="stat-dot"
-              style="background: #4ade80; box-shadow: 0 0 8px #4ade80"
-            ></div>
-            Output Format
-          </div>
+        <h1 class="title">
+          Prompt <span class="title-highlight">Enhancer</span>
+        </h1>
+        <p class="subtitle">Transform basic prompts into expert-level Claude instructions — instantly.</p>
+        <div class="pills">
+          <span class="pill pill-blue">🎭 Role Definition</span>
+          <span class="pill pill-purple">🏗️ XML Structure</span>
+          <span class="pill pill-pink">🧠 Chain-of-Thought</span>
+          <span class="pill pill-orange">🎯 Output Format</span>
         </div>
       </div>
 
       <!-- Main card -->
       <div class="card">
+        <!-- Top bar -->
         <div class="card-top-bar">
-          <div class="dot dot-r"></div>
-          <div class="dot dot-y"></div>
-          <div class="dot dot-g"></div>
-          <span class="bar-title">prompt-enhancer.vue</span>
-          <div style="margin-left: auto">
-            <div class="model-badge">
-              <div class="model-dot"></div>
-              claude-sonnet-4
-            </div>
-          </div>
+          <div class="traffic"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span></div>
+          <span class="bar-label">prompt-enhancer.vue</span>
+          <div class="model-chip"><span class="live-dot"></span>claude-sonnet-4</div>
         </div>
 
         <div class="panels">
-          <!-- Left Panel -->
+          <!-- Input -->
           <div class="panel panel-left">
-            <div class="panel-label">
-              <span>✏️ &nbsp;Your Prompt</span>
-              <span
-                class="char-count"
-                :class="{ warn: userPrompt.length > 800 }"
-                >{{ userPrompt.length }} chars</span
-              >
+            <div class="panel-header">
+              <span class="panel-title">✏️ Your Prompt</span>
+              <span class="char-pill" :class="{ warn: userPrompt.length > 800 }">{{ userPrompt.length }} chars</span>
             </div>
             <textarea
               v-model="userPrompt"
@@ -87,117 +46,64 @@
               @keydown.ctrl.enter="enhance"
               @keydown.meta.enter="enhance"
             ></textarea>
-            <div
-              style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap"
-            >
-              <div
-                class="tag"
-                v-for="ex in examples"
-                :key="ex"
+            <div class="example-row">
+              <span class="example-label">Try:</span>
+              <span
+                class="example-chip"
+                v-for="ex in examples" :key="ex"
                 @click="userPrompt = ex"
-                style="cursor: pointer"
-                title="Click to use"
-              >
-                {{ ex.slice(0, 30) }}…
-              </div>
+              >{{ ex.slice(0, 28) }}…</span>
             </div>
-            <div v-if="error" class="error-banner">⚠️ {{ error }}</div>
+            <div v-if="error" class="error-box">⚠️ {{ error }}</div>
           </div>
 
-          <!-- Right Panel -->
-          <div class="panel">
-            <div class="panel-label">
-              <span>✨ &nbsp;Enhanced Prompt</span>
-              <div class="tags" v-if="enhanced">
-                <span class="tag green">Enhanced</span>
-                <span class="tag purple">XML</span>
-                <span class="tag teal">CoT</span>
+          <!-- Output -->
+          <div class="panel panel-right">
+            <div class="panel-header">
+              <span class="panel-title">✨ Enhanced Prompt</span>
+              <div v-if="enhanced" class="result-chips">
+                <span class="rc rc-green">✓ Enhanced</span>
+                <span class="rc rc-purple">XML</span>
+                <span class="rc rc-blue">CoT</span>
               </div>
             </div>
-            <div
-              class="output-box"
-              :class="{ 'has-content': enhanced || loading }"
-            >
+            <div class="output-box" :class="{ active: enhanced || loading }">
               <template v-if="!enhanced && !loading">
-                <div class="placeholder-state">
-                  <div class="placeholder-icon">⚡</div>
-                  <div class="placeholder-text">
-                    Your enhanced prompt will appear here…
-                  </div>
+                <div class="empty-state">
+                  <div class="empty-icon">✨</div>
+                  <div class="empty-text">Your enhanced prompt will appear here</div>
                 </div>
               </template>
-              <template v-else>
-                {{ displayText }}<span v-if="loading" class="cursor"></span>
-              </template>
+              <template v-else>{{ displayText }}<span v-if="loading" class="cursor"></span></template>
             </div>
           </div>
         </div>
 
-        <!-- Bottom Bar -->
-        <div class="bottom-bar">
-          <div
-            style="
-              display: flex;
-              gap: 10px;
-              align-items: center;
-              flex-wrap: wrap;
-            "
-          >
-            <button
-              class="btn-enhance"
-              @click="enhance"
-              :disabled="loading || !userPrompt.trim()"
-            >
-              <span v-if="loading"><div class="spinner"></div></span>
-              <span v-else>
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                  style="vertical-align: middle"
-                >
-                  <path
-                    d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                  />
-                </svg>
-              </span>
+        <!-- Action bar -->
+        <div class="action-bar">
+          <div class="action-left">
+            <button class="btn-enhance" @click="enhance" :disabled="loading || !userPrompt.trim()">
+              <span v-if="loading" class="spinner"></span>
+              <span v-else>⚡</span>
               {{ loading ? 'Enhancing…' : 'Enhance Prompt' }}
             </button>
-            <span style="font-size: 12px; color: var(--muted)">⌘ + Enter</span>
+            <span class="shortcut">⌘ Enter</span>
           </div>
-          <button
-            class="btn-copy"
-            :class="{ copied }"
-            @click="copy"
-            :disabled="!enhanced"
-          >
-            <svg
-              width="13"
-              height="13"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-            >
-              <rect x="9" y="9" width="13" height="13" rx="2" />
-              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-            </svg>
-            {{ copied ? '✓ Copied!' : 'Copy' }}
+          <button class="btn-copy" :class="{ copied }" @click="copy" :disabled="!enhanced">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            {{ copied ? '✓ Copied!' : 'Copy Result' }}
           </button>
         </div>
       </div>
 
-      <!-- Features -->
+      <!-- Feature grid -->
       <div class="features">
-        <div class="features-title">What gets enhanced</div>
+        <p class="features-label">WHAT GETS ENHANCED</p>
         <div class="features-grid">
-          <div class="feature-card" v-for="f in features" :key="f.name">
-            <div class="feature-icon">{{ f.icon }}</div>
-            <div class="feature-name">{{ f.name }}</div>
-            <div class="feature-desc">{{ f.desc }}</div>
+          <div class="feat" v-for="f in features" :key="f.name">
+            <div class="feat-icon">{{ f.icon }}</div>
+            <div class="feat-name">{{ f.name }}</div>
+            <div class="feat-desc">{{ f.desc }}</div>
           </div>
         </div>
       </div>
@@ -206,656 +112,300 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref } from 'vue'
 
-const userPrompt = ref('');
-const enhanced = ref('');
-const displayText = ref('');
-const loading = ref(false);
-const copied = ref(false);
-const error = ref('');
+const userPrompt = ref('')
+const enhanced = ref('')
+const displayText = ref('')
+const loading = ref(false)
+const copied = ref(false)
+const error = ref('')
 
 const examples = [
   'create a calculator app with React only.',
   'write a Python web scraper for news sites.',
   'explain machine learning to a beginner.',
-];
+]
 
 const features = [
-  {
-    icon: '🎭',
-    name: 'Role Definition',
-    desc: 'Assigns expert persona for domain-specific authority.',
-  },
-  {
-    icon: '🏗️',
-    name: 'XML Structure',
-    desc: 'Uses Claude-native XML tags for clear instruction hierarchy.',
-  },
-  {
-    icon: '🧠',
-    name: 'Chain-of-Thought',
-    desc: 'Adds explicit reasoning steps for complex tasks.',
-  },
-  {
-    icon: '🎯',
-    name: 'Output Format',
-    desc: 'Specifies format, tone, length & structure clearly.',
-  },
-  {
-    icon: '📌',
-    name: 'Context & Scope',
-    desc: 'Defines boundaries, assumptions & edge cases.',
-  },
-  {
-    icon: '✅',
-    name: 'Examples & Rules',
-    desc: 'Adds negative/positive examples and hard constraints.',
-  },
-];
+  { icon: '🎭', name: 'Role Definition',  desc: 'Assigns expert persona for domain-specific authority.' },
+  { icon: '🏗️', name: 'XML Structure',    desc: 'Claude-native XML tags for clear hierarchy.' },
+  { icon: '🧠', name: 'Chain-of-Thought', desc: 'Explicit reasoning steps for complex tasks.' },
+  { icon: '🎯', name: 'Output Format',    desc: 'Specifies format, tone, length & structure.' },
+  { icon: '📌', name: 'Context & Scope',  desc: 'Defines boundaries and edge cases.' },
+  { icon: '✅', name: 'Examples & Rules', desc: 'Positive/negative examples and constraints.' },
+]
 
 async function enhance() {
-  if (!userPrompt.value.trim() || loading.value) return;
-  loading.value = true;
-  enhanced.value = '';
-  displayText.value = '';
-  error.value = '';
+  if (!userPrompt.value.trim() || loading.value) return
+  loading.value = true
+  enhanced.value = ''
+  displayText.value = ''
+  error.value = ''
 
   try {
-    // Calls our Vercel serverless function — NOT Anthropic directly
     const res = await fetch('/api/enhance', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: userPrompt.value.trim() }),
-    });
+      body: JSON.stringify({ prompt: userPrompt.value.trim() })
+    })
 
     if (!res.ok) {
-      const d = await res.json();
-      throw new Error(d?.error || `Server error ${res.status}`);
+      const d = await res.json()
+      throw new Error(d?.error || `Server error ${res.status}`)
     }
 
-    const data = await res.json();
-    const full = data.result || '';
-    enhanced.value = full;
+    const data = await res.json()
+    const full = data.result || ''
+    enhanced.value = full
 
-    // Typewriter effect
-    displayText.value = '';
-    let i = 0;
+    displayText.value = ''
+    let i = 0
     const tick = () => {
       if (i < full.length) {
-        displayText.value += full[i++];
-        requestAnimationFrame(tick);
+        displayText.value += full[i++]
+        requestAnimationFrame(tick)
       } else {
-        loading.value = false;
+        loading.value = false
       }
-    };
-    requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick)
+
   } catch (e) {
-    error.value = e.message;
-    loading.value = false;
+    error.value = e.message
+    loading.value = false
   }
 }
 
 async function copy() {
-  if (!enhanced.value) return;
-  await navigator.clipboard.writeText(enhanced.value);
-  copied.value = true;
-  setTimeout(() => (copied.value = false), 2000);
+  if (!enhanced.value) return
+  await navigator.clipboard.writeText(enhanced.value)
+  copied.value = true
+  setTimeout(() => (copied.value = false), 2000)
 }
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-:root {
-  --bg: #05071a;
-  --surface: #0d1130;
-  --surface2: #111840;
-  --border: #1e2a5e;
-  --border2: #2a3a7a;
-  --accent: #4f7bff;
-  --accent2: #7c3aed;
-  --teal: #06b6d4;
-  --text: #e8eaf6;
-  --muted: #7b85b8;
-  --glow: rgba(79, 123, 255, 0.18);
+.root {
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  background: #f0f4ff;
+  position: relative;
+  overflow-x: hidden;
 }
 
-.bg-grid {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  background-image: linear-gradient(
-      rgba(79, 123, 255, 0.04) 1px,
-      transparent 1px
-    ),
-    linear-gradient(90deg, rgba(79, 123, 255, 0.04) 1px, transparent 1px);
-  background-size: 40px 40px;
+/* Blobs */
+.blob {
+  position: fixed; border-radius: 50%; filter: blur(70px);
+  pointer-events: none; z-index: 0; opacity: .55;
 }
+.blob1 { width: 480px; height: 480px; top: -140px; left: -120px; background: radial-gradient(circle, #a78bfa, #818cf8); animation: b1 14s ease-in-out infinite alternate; }
+.blob2 { width: 420px; height: 420px; bottom: -100px; right: -80px; background: radial-gradient(circle, #f9a8d4, #fb923c); animation: b2 17s ease-in-out infinite alternate; }
+.blob3 { width: 320px; height: 320px; top: 45%; left: 55%; background: radial-gradient(circle, #6ee7b7, #38bdf8); animation: b3 20s ease-in-out infinite alternate; }
 
-.orb {
-  position: fixed;
-  border-radius: 50%;
-  filter: blur(80px);
-  pointer-events: none;
-  z-index: 0;
-}
-.orb1 {
-  width: 500px;
-  height: 500px;
-  top: -150px;
-  left: -100px;
-  background: radial-gradient(
-    circle,
-    rgba(79, 123, 255, 0.15),
-    transparent 70%
-  );
-  animation: drift1 12s ease-in-out infinite alternate;
-}
-.orb2 {
-  width: 400px;
-  height: 400px;
-  bottom: -100px;
-  right: -80px;
-  background: radial-gradient(
-    circle,
-    rgba(124, 58, 237, 0.15),
-    transparent 70%
-  );
-  animation: drift2 15s ease-in-out infinite alternate;
-}
-.orb3 {
-  width: 300px;
-  height: 300px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(circle, rgba(6, 182, 212, 0.08), transparent 70%);
-  animation: drift3 18s ease-in-out infinite alternate;
-}
+@keyframes b1 { to { transform: translate(50px, 60px) scale(1.1); } }
+@keyframes b2 { to { transform: translate(-40px, -50px) scale(1.15); } }
+@keyframes b3 { to { transform: translate(-30px, 40px) scale(1.08); } }
 
-@keyframes drift1 {
-  from {
-    transform: translate(0, 0) scale(1);
-  }
-  to {
-    transform: translate(60px, 40px) scale(1.1);
-  }
-}
-@keyframes drift2 {
-  from {
-    transform: translate(0, 0) scale(1);
-  }
-  to {
-    transform: translate(-50px, -30px) scale(1.15);
-  }
-}
-@keyframes drift3 {
-  from {
-    transform: translate(-50%, -50%) scale(1);
-  }
-  to {
-    transform: translate(-45%, -55%) scale(1.1);
-  }
+.dots-grid {
+  position: fixed; inset: 0; z-index: 0; opacity: .35;
+  background-image: radial-gradient(circle, #94a3b8 1px, transparent 1px);
+  background-size: 28px 28px;
 }
 
 .app {
-  font-family: 'Inter', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  position: relative;
-  z-index: 1;
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 40px 24px 80px;
+  position: relative; z-index: 1;
+  max-width: 1060px; margin: 0 auto; padding: 48px 24px 80px;
 }
 
-.header {
-  text-align: center;
-  margin-bottom: 52px;
-}
+/* Header */
+.header { text-align: center; margin-bottom: 44px; }
+
 .badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(79, 123, 255, 0.12);
-  border: 1px solid rgba(79, 123, 255, 0.3);
-  border-radius: 999px;
-  padding: 6px 16px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #7aabff;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  margin-bottom: 20px;
+  display: inline-flex; align-items: center; gap: 7px;
+  background: #fff; border: 2px solid #e0e7ff;
+  border-radius: 999px; padding: 6px 18px;
+  font-size: 12px; font-weight: 700; color: #6366f1;
+  letter-spacing: .06em; text-transform: uppercase;
+  box-shadow: 0 2px 12px rgba(99,102,241,.12);
+  margin-bottom: 22px;
 }
-.badge svg {
-  width: 14px;
-  height: 14px;
-}
+.badge-icon { font-size: 14px; }
+
 .title {
-  font-size: clamp(2.2rem, 5vw, 3.4rem);
-  font-weight: 800;
-  line-height: 1.1;
-  background: linear-gradient(135deg, #e8eaf6 0%, #7aabff 45%, #c084fc 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 14px;
+  font-size: clamp(2.4rem, 5.5vw, 3.8rem);
+  font-weight: 900; line-height: 1.08; color: #1e1b4b;
+  margin-bottom: 14px; letter-spacing: -.02em;
 }
-.subtitle {
-  color: var(--muted);
-  font-size: 1.05rem;
-  max-width: 520px;
-  margin: 0 auto;
-  line-height: 1.6;
+.title-highlight {
+  background: linear-gradient(135deg, #6366f1, #ec4899);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
 }
 
-.stats {
-  display: flex;
-  justify-content: center;
-  gap: 32px;
-  margin-top: 28px;
-  flex-wrap: wrap;
-}
-.stat {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--muted);
-  font-size: 13px;
-}
-.stat-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 8px var(--accent);
-}
+.subtitle { color: #64748b; font-size: 1.05rem; max-width: 480px; margin: 0 auto 22px; line-height: 1.65; }
 
+.pills { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.pill {
+  font-size: 12px; font-weight: 600; padding: 5px 14px; border-radius: 999px;
+  border: 2px solid transparent;
+}
+.pill-blue   { background: #eff6ff; color: #3b82f6; border-color: #bfdbfe; }
+.pill-purple { background: #f5f3ff; color: #7c3aed; border-color: #ddd6fe; }
+.pill-pink   { background: #fdf2f8; color: #db2777; border-color: #fbcfe8; }
+.pill-orange { background: #fff7ed; color: #ea580c; border-color: #fed7aa; }
+
+/* Card */
 .card {
-  background: linear-gradient(
-    135deg,
-    rgba(13, 17, 48, 0.9),
-    rgba(17, 24, 64, 0.8)
-  );
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  backdrop-filter: blur(20px);
-  box-shadow: 0 8px 60px rgba(0, 0, 0, 0.5);
-  transition: box-shadow 0.3s;
+  background: #fff;
+  border: 2px solid #e0e7ff;
+  border-radius: 24px;
+  box-shadow: 0 8px 40px rgba(99,102,241,.1), 0 2px 8px rgba(0,0,0,.06);
+  overflow: hidden;
+  transition: box-shadow .3s;
 }
-.card:hover {
-  box-shadow: 0 12px 80px rgba(0, 0, 0, 0.6), 0 0 40px rgba(79, 123, 255, 0.08);
-}
+.card:hover { box-shadow: 0 16px 60px rgba(99,102,241,.16), 0 2px 8px rgba(0,0,0,.06); }
 
 .card-top-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.02);
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 20px; background: #f8faff;
+  border-bottom: 2px solid #e0e7ff;
 }
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+.traffic { display: flex; gap: 6px; }
+.tl { width: 11px; height: 11px; border-radius: 50%; }
+.tl.r { background: #ff5f57; } .tl.y { background: #febc2e; } .tl.g { background: #28c840; }
+.bar-label { font-size: 12px; font-weight: 600; color: #94a3b8; margin-left: 4px; }
+.model-chip {
+  margin-left: auto; display: flex; align-items: center; gap: 6px;
+  background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 8px;
+  padding: 4px 12px; font-size: 11px; font-weight: 700; color: #16a34a;
 }
-.dot-r {
-  background: #ff5f57;
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 6px #22c55e; animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
+
+.panels { display: grid; grid-template-columns: 1fr 1fr; }
+@media (max-width: 680px) { .panels { grid-template-columns: 1fr; } }
+
+.panel { padding: 24px; }
+.panel-left { border-right: 2px solid #e0e7ff; }
+@media (max-width: 680px) { .panel-left { border-right: none; border-bottom: 2px solid #e0e7ff; } }
+
+.panel-header {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
 }
-.dot-y {
-  background: #febc2e;
+.panel-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #94a3b8; }
+.char-pill {
+  font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px;
+  background: #eff6ff; color: #3b82f6; border: 1.5px solid #bfdbfe;
 }
-.dot-g {
-  background: #28c840;
+.char-pill.warn { background: #fff7ed; color: #ea580c; border-color: #fed7aa; }
+
+textarea {
+  width: 100%; min-height: 216px; border: 2px solid #e2e8f0; border-radius: 14px;
+  background: #f8faff; color: #1e1b4b; font-family: 'Inter', sans-serif;
+  font-size: 14px; line-height: 1.75; padding: 14px 16px; resize: vertical; outline: none;
+  transition: border-color .2s, box-shadow .2s;
 }
-.bar-title {
-  margin-left: 8px;
-  font-size: 12px;
-  color: var(--muted);
+textarea::placeholder { color: #cbd5e1; }
+textarea:focus { border-color: #818cf8; box-shadow: 0 0 0 4px rgba(129,140,248,.12); background: #fff; }
+
+.example-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.example-label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: .06em; }
+.example-chip {
+  font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 999px;
+  background: #f1f5f9; color: #64748b; border: 1.5px solid #e2e8f0;
+  cursor: pointer; transition: all .15s;
+}
+.example-chip:hover { background: #eff6ff; color: #6366f1; border-color: #c7d2fe; }
+
+.output-box {
+  min-height: 216px; border: 2px solid #e2e8f0; border-radius: 14px;
+  background: #f8faff; padding: 14px 16px; font-size: 14px; line-height: 1.8;
+  color: #1e1b4b; white-space: pre-wrap; word-break: break-word;
+  font-family: 'Inter', monospace; position: relative; transition: border-color .3s, background .3s;
+}
+.output-box.active { border-color: #818cf8; background: #fff; box-shadow: 0 0 0 4px rgba(129,140,248,.08); }
+
+.empty-state {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 10px;
+}
+.empty-icon { font-size: 30px; opacity: .25; }
+.empty-text { font-size: 13px; color: #cbd5e1; font-family: 'Inter', sans-serif; font-weight: 500; }
+
+.result-chips { display: flex; gap: 6px; }
+.rc { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 999px; letter-spacing: .04em; text-transform: uppercase; }
+.rc-green  { background: #f0fdf4; color: #16a34a; border: 1.5px solid #bbf7d0; }
+.rc-purple { background: #f5f3ff; color: #7c3aed; border: 1.5px solid #ddd6fe; }
+.rc-blue   { background: #eff6ff; color: #2563eb; border: 1.5px solid #bfdbfe; }
+
+.cursor {
+  display: inline-block; width: 2px; height: 1.1em; background: #6366f1;
+  margin-left: 2px; vertical-align: text-bottom; animation: blink .7s step-end infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* Action bar */
+.action-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 24px; border-top: 2px solid #e0e7ff;
+  background: #f8faff; gap: 12px; flex-wrap: wrap;
+}
+.action-left { display: flex; align-items: center; gap: 12px; }
+.shortcut { font-size: 12px; color: #94a3b8; font-weight: 600; }
+
+.btn-enhance {
+  display: flex; align-items: center; gap: 9px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: none; border-radius: 12px; padding: 12px 26px;
+  color: #fff; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 700;
+  cursor: pointer; box-shadow: 0 4px 20px rgba(99,102,241,.4);
+  transition: all .2s; letter-spacing: .01em;
+}
+.btn-enhance:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(99,102,241,.5); filter: brightness(1.05); }
+.btn-enhance:active { transform: translateY(0); }
+.btn-enhance:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.btn-copy {
+  display: flex; align-items: center; gap: 8px;
+  background: #fff; border: 2px solid #e2e8f0; border-radius: 10px;
+  padding: 10px 18px; color: #64748b; font-family: 'Inter', sans-serif;
+  font-size: 13px; font-weight: 700; cursor: pointer; transition: all .2s;
+}
+.btn-copy:hover { border-color: #818cf8; color: #6366f1; background: #f5f3ff; }
+.btn-copy.copied { border-color: #86efac; color: #16a34a; background: #f0fdf4; }
+.btn-copy:disabled { opacity: .3; cursor: not-allowed; }
+
+.spinner {
+  width: 15px; height: 15px; border: 2.5px solid rgba(255,255,255,.35);
+  border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.error-box {
+  margin-top: 10px; background: #fff1f2; border: 1.5px solid #fecdd3;
+  border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #e11d48;
   font-weight: 500;
 }
 
-.panels {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+/* Features */
+.features { margin-top: 36px; }
+.features-label {
+  text-align: center; font-size: 11px; font-weight: 800; letter-spacing: .1em;
+  color: #94a3b8; margin-bottom: 16px;
 }
-@media (max-width: 700px) {
-  .panels {
-    grid-template-columns: 1fr;
-  }
-}
+.features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
 
-.panel {
-  padding: 24px;
+.feat {
+  background: #fff; border: 2px solid #e0e7ff; border-radius: 16px;
+  padding: 18px 16px; transition: all .2s;
+  box-shadow: 0 2px 8px rgba(99,102,241,.06);
 }
-.panel-left {
-  border-right: 1px solid var(--border);
-}
-@media (max-width: 700px) {
-  .panel-left {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-}
-
-.panel-label {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 12px;
-}
-.char-count {
-  font-size: 11px;
-  color: var(--muted);
-  background: rgba(79, 123, 255, 0.1);
-  border: 1px solid rgba(79, 123, 255, 0.2);
-  border-radius: 6px;
-  padding: 2px 8px;
-  font-weight: 600;
-}
-.char-count.warn {
-  color: #fbbf24;
-  border-color: rgba(251, 191, 36, 0.3);
-}
-
-textarea {
-  width: 100%;
-  min-height: 220px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  color: var(--text);
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  line-height: 1.7;
-  padding: 14px 16px;
-  resize: vertical;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-textarea::placeholder {
-  color: rgba(123, 133, 184, 0.5);
-}
-textarea:focus {
-  border-color: rgba(79, 123, 255, 0.5);
-  box-shadow: 0 0 0 3px rgba(79, 123, 255, 0.1);
-}
-
-.output-box {
-  min-height: 220px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px 16px;
-  font-size: 14px;
-  line-height: 1.8;
-  color: var(--text);
-  white-space: pre-wrap;
-  word-break: break-word;
-  font-family: 'Inter', monospace;
-  position: relative;
-  transition: border-color 0.3s;
-}
-.output-box.has-content {
-  border-color: rgba(79, 123, 255, 0.3);
-}
-
-.placeholder-state {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-.placeholder-icon {
-  font-size: 28px;
-  opacity: 0.3;
-}
-.placeholder-text {
-  color: rgba(123, 133, 184, 0.4);
-  font-size: 13px;
-  font-family: 'Inter', sans-serif;
-}
-
-.cursor {
-  display: inline-block;
-  width: 2px;
-  height: 1.1em;
-  background: var(--accent);
-  margin-left: 2px;
-  vertical-align: text-bottom;
-  animation: blink 0.7s step-end infinite;
-}
-@keyframes blink {
-  50% {
-    opacity: 0;
-  }
-}
-
-.bottom-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 24px;
-  border-top: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.01);
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.btn-enhance {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  border: none;
-  border-radius: 12px;
-  padding: 12px 28px;
-  color: #fff;
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 4px 24px rgba(79, 123, 255, 0.35);
-  transition: all 0.2s;
-  position: relative;
-  overflow: hidden;
-}
-.btn-enhance::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), transparent);
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-.btn-enhance:hover::before {
-  opacity: 1;
-}
-.btn-enhance:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 32px rgba(79, 123, 255, 0.5);
-}
-.btn-enhance:active {
-  transform: translateY(0);
-}
-.btn-enhance:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.btn-copy {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border2);
-  border-radius: 10px;
-  padding: 10px 18px;
-  color: var(--muted);
-  font-family: 'Inter', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.btn-copy:hover {
-  background: rgba(79, 123, 255, 0.1);
-  border-color: rgba(79, 123, 255, 0.4);
-  color: var(--text);
-}
-.btn-copy.copied {
-  color: #4ade80;
-  border-color: rgba(74, 222, 128, 0.4);
-  background: rgba(74, 222, 128, 0.08);
-}
-.btn-copy:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.tags {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.tag {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 6px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  background: rgba(79, 123, 255, 0.1);
-  border: 1px solid rgba(79, 123, 255, 0.2);
-  color: #7aabff;
-}
-.tag.green {
-  background: rgba(74, 222, 128, 0.1);
-  border-color: rgba(74, 222, 128, 0.2);
-  color: #4ade80;
-}
-.tag.purple {
-  background: rgba(192, 132, 252, 0.1);
-  border-color: rgba(192, 132, 252, 0.2);
-  color: #c084fc;
-}
-.tag.teal {
-  background: rgba(6, 182, 212, 0.1);
-  border-color: rgba(6, 182, 212, 0.2);
-  color: #22d3ee;
-}
-
-.features {
-  margin-top: 36px;
-}
-.features-title {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-  text-align: center;
-  margin-bottom: 18px;
-}
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 14px;
-}
-.feature-card {
-  background: rgba(13, 17, 48, 0.7);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 16px 18px;
-  transition: all 0.2s;
-  backdrop-filter: blur(10px);
-}
-.feature-card:hover {
-  border-color: var(--border2);
-  background: rgba(17, 24, 64, 0.8);
-  transform: translateY(-2px);
-}
-.feature-icon {
-  font-size: 18px;
-  margin-bottom: 8px;
-}
-.feature-name {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 4px;
-}
-.feature-desc {
-  font-size: 12px;
-  color: var(--muted);
-  line-height: 1.5;
-}
-
-.error-banner {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 10px;
-  padding: 10px 14px;
-  font-size: 13px;
-  color: #fca5a5;
-  margin-top: 10px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.model-badge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  color: var(--muted);
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 6px 12px;
-  font-weight: 600;
-}
-.model-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #4ade80;
-  box-shadow: 0 0 6px #4ade80;
-}
+.feat:hover { border-color: #a5b4fc; transform: translateY(-3px); box-shadow: 0 8px 24px rgba(99,102,241,.12); }
+.feat-icon { font-size: 20px; margin-bottom: 8px; }
+.feat-name { font-size: 13px; font-weight: 800; color: #1e1b4b; margin-bottom: 4px; }
+.feat-desc { font-size: 12px; color: #64748b; line-height: 1.5; }
 </style>
